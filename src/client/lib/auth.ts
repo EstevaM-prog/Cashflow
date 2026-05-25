@@ -1,7 +1,7 @@
-import { api } from "./api";
+// import { api } from "./api"; // removed as there is no backend
 
 export interface User {
-  id: number;
+  id: string; // Changed to string to support randomUUID
   name: string;
   email: string;
   phone?: string;
@@ -45,32 +45,45 @@ export function getToken(): string | null {
   return localStorage.getItem("mymoneyfriend_token");
 }
 
-// ─── Registra novo usuário via API ────────────────────────────────────────────
+// ─── Registra novo usuário via LocalStorage ────────────────────────────────────────────
 export async function register(name: string, email: string, password: string): Promise<User> {
-  const res = await api.post("/auth/register", { name, email, password });
-  const user: User = res.data.data;
-  const token: string = res.data.token;
-  saveSession(user, token); // sessão de 7 dias a partir do cadastro
-  return user;
+  const users = JSON.parse(localStorage.getItem("mymoneyfriend_users") || "[]");
+  if (users.find((u: any) => u.email === email)) {
+    throw new Error("E-mail já cadastrado");
+  }
+
+  const user = {
+    id: crypto.randomUUID(),
+    name,
+    email,
+    password, // Em um app real, nunca salve senha em plain text!
+  };
+  
+  users.push(user);
+  localStorage.setItem("mymoneyfriend_users", JSON.stringify(users));
+
+  const { password: _, ...userWithoutPassword } = user;
+  const token = "mock-jwt-token-" + user.id;
+
+  saveSession(userWithoutPassword as User, token); // sessão de 7 dias a partir do cadastro
+  return userWithoutPassword as User;
 }
 
-// ─── Login via API + renova sessão por mais 7 dias ────────────────────────────
+// ─── Login via LocalStorage + renova sessão por mais 7 dias ────────────────────────────
 export async function login(email: string, password: string): Promise<User> {
-  const res = await api.post("/auth/login", {
-    email: email.trim(),
-    password,
-  });
-
-  const user: User = res.data.data;
-  const token: string = res.data.token;
+  const users = JSON.parse(localStorage.getItem("mymoneyfriend_users") || "[]");
+  const user = users.find((u: any) => u.email === email.trim() && u.password === password);
 
   if (!user) {
     throw new Error("Credenciais inválidas.");
   }
 
+  const { password: _, ...userWithoutPassword } = user;
+  const token = "mock-jwt-token-" + user.id;
+
   // Renova a sessão por mais 7 dias a cada login bem-sucedido
-  saveSession(user, token);
-  return user;
+  saveSession(userWithoutPassword as User, token);
+  return userWithoutPassword as User;
 }
 
 // ─── Logout: remove apenas a sessão ──────────────────────────────────────────

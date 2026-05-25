@@ -1,98 +1,59 @@
-import axios from "axios";
-
 /**
- * My Money Friend - API Client Configuration
- * Base URL: Points to the Go/Gin backend.
+ * My Money Friend - LocalStorage Mock API
+ * Since the backend was removed, all data is now stored in the browser's localStorage.
  */
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("mymoneyfriend_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Helper for data extraction to keep code DRY
-const extractData = (res: any) => res.data.data;
+function getFromStorage(key: string) {
+  const data = localStorage.getItem(`mymoneyfriend_${key}`);
+  return data ? JSON.parse(data) : [];
+}
 
-/**
- * 👤 USER SERVICE
- */
-export const usersService = {
-  getAll: () => api.get("/users").then(extractData),
-  create: (payload: any) => api.post("/users", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/users/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/users/${id}`),
-};
+function saveToStorage(key: string, data: any) {
+  localStorage.setItem(`mymoneyfriend_${key}`, JSON.stringify(data));
+}
 
-/**
- * 💳 ACCOUNTS SERVICE
- */
-export const accountsService = {
-  getAll: () => api.get("/accounts").then(extractData),
-  create: (payload: any) => api.post("/accounts", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/accounts/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/accounts/${id}`),
-};
+function createMockService(key: string) {
+  return {
+    getAll: async () => {
+      await delay(100);
+      return getFromStorage(key);
+    },
+    create: async (payload: any) => {
+      await delay(100);
+      const items = getFromStorage(key);
+      const newItem = { ...payload, id: payload.id || crypto.randomUUID() };
+      items.push(newItem);
+      saveToStorage(key, items);
+      return newItem;
+    },
+    update: async (id: string, payload: any) => {
+      await delay(100);
+      const items = getFromStorage(key);
+      const index = items.findIndex((item: any) => item.id === id);
+      if (index !== -1) {
+        items[index] = { ...items[index], ...payload, id };
+        saveToStorage(key, items);
+        return items[index];
+      }
+      throw new Error(`${key} not found`);
+    },
+    delete: async (id: string, type?: string) => {
+      await delay(100);
+      const items = getFromStorage(key);
+      const filtered = items.filter((item: any) => item.id !== id);
+      saveToStorage(key, filtered);
+      return { success: true };
+    },
+  };
+}
 
-/**
- * 💸 TRANSACTIONS SERVICE
- */
-export const transactionsService = {
-  // Backend returns all transactions in one endpoint
-  getAll: async () => {
-    return api.get("/transactions").then(extractData);
-  },
-  create: (payload: any) => {
-    return api.post("/transactions", payload).then(extractData);
-  },
-  delete: (id: string, type?: string) => {
-    return api.delete(`/transactions/${id}`);
-  },
-};
+export const usersService = createMockService("users");
+export const accountsService = createMockService("accounts");
+export const transactionsService = createMockService("transactions");
+export const goalsService = createMockService("goals");
+export const categoriesService = createMockService("categories");
+export const investmentsService = createMockService("investments");
+export const budgetRulesService = createMockService("budgetRules");
 
-/**
- * 🎯 GOALS SERVICE
- */
-export const goalsService = {
-  getAll: () => api.get("/goals").then(extractData),
-  create: (payload: any) => api.post("/goals", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/goals/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/goals/${id}`),
-};
-
-/**
- * 🏷️ CATEGORIES SERVICE
- */
-export const categoriesService = {
-  getAll: () => api.get("/categories").then(extractData),
-  create: (payload: any) => api.post("/categories", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/categories/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/categories/${id}`),
-};
-
-/**
- * 📈 INVESTMENTS SERVICE
- */
-export const investmentsService = {
-  getAll: () => api.get("/investments").then(extractData),
-  create: (payload: any) => api.post("/investments", payload).then(extractData),
-  delete: (id: string) => api.delete(`/investments/${id}`),
-};
-
-/**
- * 📝 BUDGET RULES SERVICE
- */
-export const budgetRulesService = {
-  getAll: () => api.get("/budget-rules").then(extractData),
-  create: (payload: any) => api.post("/budget-rules", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/budget-rules/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/budget-rules/${id}`),
-};
