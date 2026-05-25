@@ -13,10 +13,13 @@ const SESSION_EXPIRY_KEY = "mymoneyfriend_session_expiry";
 const SESSION_DAYS = 7;
 
 // ─── Salva a sessão com validade de 7 dias ────────────────────────────────────
-function saveSession(user: User) {
+function saveSession(user: User, token?: string) {
   const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
   localStorage.setItem(SESSION_KEY, JSON.stringify(user));
   localStorage.setItem(SESSION_EXPIRY_KEY, String(expiry));
+  if (token) {
+    localStorage.setItem("mymoneyfriend_token", token);
+  }
 }
 
 // ─── Retorna a sessão válida ou null ──────────────────────────────────────────
@@ -38,11 +41,16 @@ export function getSession(): User | null {
   }
 }
 
+export function getToken(): string | null {
+  return localStorage.getItem("mymoneyfriend_token");
+}
+
 // ─── Registra novo usuário via API ────────────────────────────────────────────
 export async function register(name: string, email: string, password: string): Promise<User> {
-  const res = await api.post("/users", { name, email, password });
+  const res = await api.post("/auth/register", { name, email, password });
   const user: User = res.data.data;
-  saveSession(user); // sessão de 7 dias a partir do cadastro
+  const token: string = res.data.token;
+  saveSession(user, token); // sessão de 7 dias a partir do cadastro
   return user;
 }
 
@@ -54,13 +62,14 @@ export async function login(email: string, password: string): Promise<User> {
   });
 
   const user: User = res.data.data;
+  const token: string = res.data.token;
 
   if (!user) {
     throw new Error("Credenciais inválidas.");
   }
 
   // Renova a sessão por mais 7 dias a cada login bem-sucedido
-  saveSession(user);
+  saveSession(user, token);
   return user;
 }
 
@@ -68,6 +77,7 @@ export async function login(email: string, password: string): Promise<User> {
 export function logout() {
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(SESSION_EXPIRY_KEY);
+  localStorage.removeItem("mymoneyfriend_token");
 }
 
 // ─── Verifica se a sessão está próxima do vencimento e renova ─────────────────

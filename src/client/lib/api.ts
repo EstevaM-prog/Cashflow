@@ -5,10 +5,18 @@ import axios from "axios";
  * Base URL: Points to the Go/Gin backend.
  */
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://cashflow-dg8a.onrender.com/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("mymoneyfriend_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Helper for data extraction to keep code DRY

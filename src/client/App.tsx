@@ -34,7 +34,14 @@ import Payment from "./pages/Payment";
 
 import { ThemeProvider } from "@/components/theme-provider";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   return getSession() ? <>{children}</> : <Navigate to="/apresentacao" replace />;
@@ -50,7 +57,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Public routes */}
             <Route
