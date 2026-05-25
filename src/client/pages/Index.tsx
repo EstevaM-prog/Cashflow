@@ -140,15 +140,10 @@ const Index = () => {
         animate="visible"
         className={cn(
           "max-w-[1400px] mx-auto px-4 sm:px-8 py-6 sm:py-10 space-y-6 relative z-10 transition-opacity duration-500",
-          isLoading ? "opacity-50 pointer-events-none" : "opacity-100"
+          "opacity-100"
         )}
       >
-        {isLoading && (
-          <div className="fixed top-20 right-8 z-50 flex items-center gap-2 bg-primary/20 text-primary px-4 py-2 rounded-full border border-primary/20 backdrop-blur-md animate-pulse">
-            <Zap className="h-4 w-4 animate-spin" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Sincronizando...</span>
-          </div>
-        )}
+        {/* Removed Sincronizando toast per user request */}
         {/* ─── Hero Header ─── */}
         <motion.section variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4">
           <div className="space-y-1">

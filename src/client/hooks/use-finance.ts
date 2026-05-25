@@ -74,7 +74,12 @@ export function useFinance() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      //toast.success("Transação salva com sucesso!");
     },
+    onError: (err) => {
+      console.error("Error creating transaction:", err);
+      //toast.error("Erro ao salvar transação. Verifique os dados.");
+    }
   });
 
   const deleteTransactionMutation = useMutation({
@@ -82,7 +87,12 @@ export function useFinance() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      //toast.success("Transação excluída!");
     },
+    onError: (err) => {
+      console.error("Error deleting transaction:", err);
+      //toast.error("Erro ao excluir transação.");
+    }
   });
 
   const addGoalMutation = useMutation({

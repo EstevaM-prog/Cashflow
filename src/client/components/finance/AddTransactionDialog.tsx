@@ -92,9 +92,9 @@ export function AddTransactionDialog({ onAdd, open: controlledOpen, onOpenChange
     };
 
     if (type === "expense") {
-      baseTransaction.email_notification_active = emailNotificationActive;
+      (baseTransaction as any).emailNotificationActive = emailNotificationActive;
       if (emailNotificationActive) {
-        baseTransaction.notification_scheduled_at = new Date().toISOString();
+        (baseTransaction as any).notificationScheduledAt = new Date().toISOString();
       }
     }
 

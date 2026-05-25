@@ -46,24 +46,27 @@
 - Instância no [Neon.tech](https://neon.tech)
 
 ### **Configuração do Ambiente**
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `.env` dentro da pasta `src/server`:
 ```env
-DATABASE_URL=postgresql://usuário:senha@host/neondb?sslmode=require
-PORT=8080
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/my_money_friend?schema=public"
+PORT=3001
+FRONTEND_URL="http://localhost:5173"
+JWT_SECRET="super-secret-key-change-me-in-production"
 ```
 
 ### **Passo a Passo**
 
-#### **1. Backend (Bun + Elysia)**
+#### **1. Backend (Bun + Elysia + Prisma)**
 ```bash
 cd src/server
 bun install                     # Instala dependências do servidor
-bun dev                         # Inicia o servidor na porta 8080
+bunx prisma db push             # Sincroniza o schema com o banco de dados
+bun dev                         # Inicia o servidor na porta 3001
 ```
 
-#### **2. Frontend (React + Bun)**
+#### **2. Frontend (React + Bun/Vite)**
 ```bash
-# Na raiz do projeto
+# Na raiz do projeto (onde está o frontend)
 bun install                     # Instala dependências do client
 bun dev                         # Inicia o frontend em http://localhost:5173
 ```

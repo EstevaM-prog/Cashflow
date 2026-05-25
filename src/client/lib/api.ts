@@ -36,33 +36,25 @@ export const usersService = {
  * 💳 ACCOUNTS SERVICE
  */
 export const accountsService = {
-  getAll: () => api.get("/cartoes").then(extractData),
-  create: (payload: any) => api.post("/cartoes", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/cartoes/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/cartoes/${id}`),
+  getAll: () => api.get("/accounts").then(extractData),
+  create: (payload: any) => api.post("/accounts", payload).then(extractData),
+  update: (id: string, payload: any) => api.put(`/accounts/${id}`, payload).then(extractData),
+  delete: (id: string) => api.delete(`/accounts/${id}`),
 };
 
 /**
  * 💸 TRANSACTIONS SERVICE
  */
 export const transactionsService = {
-  // Merges both income (receitas) and expenses (despesas) into a single stream
+  // Backend returns all transactions in one endpoint
   getAll: async () => {
-    const [despesas, receitas] = await Promise.all([
-      api.get("/despesas"),
-      api.get("/receitas")
-    ]);
-    const d = despesas.data.data || [];
-    const r = receitas.data.data || [];
-    return [...d, ...r];
+    return api.get("/transactions").then(extractData);
   },
   create: (payload: any) => {
-    const endpoint = payload.type === "income" ? "/receitas" : "/despesas";
-    return api.post(endpoint, payload).then(extractData);
+    return api.post("/transactions", payload).then(extractData);
   },
-  delete: (id: string, type: string) => {
-    const endpoint = type === "income" ? "/receitas" : "/despesas";
-    return api.delete(`${endpoint}/${id}`);
+  delete: (id: string, type?: string) => {
+    return api.delete(`/transactions/${id}`);
   },
 };
 
@@ -70,10 +62,10 @@ export const transactionsService = {
  * 🎯 GOALS SERVICE
  */
 export const goalsService = {
-  getAll: () => api.get("/metas").then(extractData),
-  create: (payload: any) => api.post("/metas", payload).then(extractData),
-  update: (id: string, payload: any) => api.put(`/metas/${id}`, payload).then(extractData),
-  delete: (id: string) => api.delete(`/metas/${id}`),
+  getAll: () => api.get("/goals").then(extractData),
+  create: (payload: any) => api.post("/goals", payload).then(extractData),
+  update: (id: string, payload: any) => api.put(`/goals/${id}`, payload).then(extractData),
+  delete: (id: string) => api.delete(`/goals/${id}`),
 };
 
 /**
