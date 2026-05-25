@@ -297,14 +297,14 @@ export function AddTransactionDialog({ onAdd, open: controlledOpen, onOpenChange
                       <Wallet className="h-4 w-4 text-muted-foreground/60" />
                     </div>
                     <div>
-                      <Label className="text-sm font-bold text-foreground uppercase tracking-wider">Aviso de Vencimento</Label>
-                      <p className="text-[10px] text-muted-foreground font-medium">Receber alerta no email cadastrado</p>
+                      <Label className="text-sm font-bold text-foreground uppercase tracking-wider">Notificar Vencimento</Label>
+                      <p className="text-[10px] text-muted-foreground font-medium">Lembrar por e-mail no dia do vencimento</p>
                     </div>
                   </div>
-                  <NotificationToggle
-                    variant="switch"
-                    active={emailNotificationActive}
-                    onToggle={() => setEmailNotificationActive(!emailNotificationActive)}
+                  <Switch 
+                    checked={emailNotificationActive} 
+                    onCheckedChange={setEmailNotificationActive} 
+                    className="data-[state=checked]:bg-primary" 
                   />
                 </div>
               )}
